@@ -1,0 +1,71 @@
+{
+  "cors": {
+    "allow_origins": ["*"],
+    "allow_methods": ["OPTIONS", "GET", "POST", "PUT", "DELETE"],
+    "allow_headers": ["Origin"],
+    "expose_headers": [],
+    "allow_credentials": true
+  },
+  "token": {
+    "secret": "",
+    "issuer": "issuer",
+    "audience": "site.test",
+    "expires": 300
+  },
+  "services": [
+    {
+      "name": "auth",
+      "base_url": "http://127.0.0.1:3000",
+      "routes": [
+        {
+          "name": "login",
+          "method": "POST",
+          "middlewares": [],
+          "path": [
+            "/v1/auth/login"
+          ],
+          "service_path": "/v1/user/login",
+          "service_method": "POST",
+          "token_field": {
+            "data.id": "user_id"
+          }
+        }
+      ]
+    },
+    {
+      "name": "user",
+      "base_url": "http://localhost:3002",
+      "routes": [
+        {
+          "name": "detail",
+          "method": "GET",
+          "auth": true,
+          "middlewares": [],
+          "path": [
+            "/v1/user/detail",
+            "/v1/user/profile"
+          ],
+          "service_path": "/v1/user/detail/{auth.user_id}",
+          "service_method": "GET"
+        }
+      ]
+    },
+    {
+      "name": "product",
+      "base_url": "http://localhost:3003",
+      "routes": [
+        {
+          "name": "detail",
+          "method": "GET",
+          "auth": true,
+          "middlewares": [],
+          "path": [
+            "/v1/product/detail/:id"
+          ],
+          "service_path": "/product/detail/{param.id}",
+          "service_method": "GET"
+        }
+      ]
+    }
+  ]
+}

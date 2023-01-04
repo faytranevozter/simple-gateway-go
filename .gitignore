@@ -1,0 +1,9 @@
+.DS_Store
+.vscode
+config.yaml
+.env
+server.log
+server-*.log
+coverage.out
+build-app
+config.json
