@@ -2,14 +2,12 @@ package domain
 
 import (
 	"net/http"
-
-	"github.com/gin-contrib/cors"
 )
 
 type Config struct {
-	Cors     cors.Config `json:"auth"`
-	Token    Token       `json:"token"`
-	Services []Service   `json:"services"`
+	Cors     CorsConfig `json:"cors"`
+	Token    Token      `json:"token"`
+	Services []Service  `json:"services"`
 }
 
 type Token struct {

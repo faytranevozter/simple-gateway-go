@@ -64,7 +64,14 @@ func main() {
 	router := gin.New()
 
 	// cors
-	router.Use(cors.New(serviceConfig.Cors))
+	corsConfig := cors.Config{
+		AllowOrigins:     serviceConfig.Cors.AllowOrigins,
+		AllowMethods:     serviceConfig.Cors.AllowMethods,
+		AllowHeaders:     serviceConfig.Cors.AllowHeaders,
+		ExposeHeaders:    serviceConfig.Cors.ExposeHeaders,
+		AllowCredentials: serviceConfig.Cors.AllowCredentials,
+	}
+	router.Use(cors.New(corsConfig))
 
 	router.Use(customRequestLogger())
 	router.Use(customRecovery(goenv))
