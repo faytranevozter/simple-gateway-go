@@ -2,7 +2,7 @@
   "cors": {
     "allow_origins": ["*"],
     "allow_methods": ["OPTIONS", "GET", "POST", "PUT", "DELETE"],
-    "allow_headers": ["Origin"],
+    "allow_headers": ["Origin", "Content-Length", "Content-Type"],
     "expose_headers": [],
     "allow_credentials": true
   },

@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -61,6 +62,9 @@ func main() {
 	}
 	gin.DefaultWriter = log.StandardLogger().Writer()
 	router := gin.New()
+
+	// cors
+	router.Use(cors.New(serviceConfig.Cors))
 
 	router.Use(customRequestLogger())
 	router.Use(customRecovery(goenv))
