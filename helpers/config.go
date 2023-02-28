@@ -1,10 +1,12 @@
 package helpers
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"gateway-api/domain"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"strings"
 )
@@ -29,17 +31,68 @@ func ConfigToMap(config domain.Config) map[string]domain.RouteService {
 }
 
 func SimpleRequest(method, url string, requestOption domain.RequestPayload) (body []byte, status int, err error) {
-	var payload *strings.Reader
+	var payload io.Reader
 	if requestOption.Data != nil {
 		payloadByte, _ := json.Marshal(requestOption.Data)
 		payload = strings.NewReader(string(payloadByte))
 	}
 
-	client := &http.Client{}
-	req, err := http.NewRequest(method, url, payload)
-	if err != nil {
-		fmt.Println(err)
-		return
+	var req *http.Request
+
+	if requestOption.Multipart != nil {
+		multipartBody := new(bytes.Buffer)
+		writer := multipart.NewWriter(multipartBody)
+
+		// loop through all uploaded files
+		for fieldName, fs := range requestOption.Multipart.File {
+			for _, f := range fs {
+				ff, _ := writer.CreateFormFile(fieldName, f.Filename)
+				x, errFile := f.Open()
+				if errFile != nil {
+					fmt.Println(errFile)
+					return
+				}
+				defer x.Close()
+
+				byteFile, errRead := io.ReadAll(x)
+				if errRead != nil {
+					fmt.Println(errRead)
+					return
+				}
+
+				// write
+				ff.Write(byteFile)
+			}
+		}
+
+		// regular form (text)
+		for fieldName, fs := range requestOption.Multipart.Value {
+			for _, val := range fs {
+				writer.WriteField(fieldName, val)
+			}
+		}
+
+		// Close the multipart writer
+		writer.Close()
+
+		req, err = http.NewRequest(method, url, multipartBody)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		// set header
+		req.Header = requestOption.Headers
+		req.Header.Set("Content-Type", writer.FormDataContentType())
+	} else {
+		req, err = http.NewRequest(method, url, payload)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		// set header
+		req.Header = requestOption.Headers
 	}
 
 	// parsing query
@@ -49,9 +102,7 @@ func SimpleRequest(method, url string, requestOption domain.RequestPayload) (bod
 	}
 	req.URL.RawQuery = q.Encode()
 
-	// set header
-	req.Header = requestOption.Headers
-
+	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
 		fmt.Println(err)

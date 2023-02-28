@@ -2,7 +2,6 @@ package domain
 
 import (
 	"net/http"
-	"net/url"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
@@ -10,8 +9,7 @@ import (
 
 // default param
 type DefaultPayload struct {
-	Query        url.Values
-	Params       gin.Params
+	Context      *gin.Context
 	Request      *http.Request
 	ID           interface{}
 	Payload      interface{}

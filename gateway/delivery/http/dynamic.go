@@ -12,7 +12,9 @@ func (h *handler) DynamicRoute(c *gin.Context, RouteID string) {
 	ctx := c.Request.Context()
 
 	payload := make(map[string]interface{})
-	c.ShouldBindJSON(&payload)
+	if c.Request.Header.Get("content-type") == "application/json" {
+		c.ShouldBindJSON(&payload)
+	}
 
 	route := h.routesMap[RouteID]
 
@@ -28,9 +30,8 @@ func (h *handler) DynamicRoute(c *gin.Context, RouteID string) {
 	}
 
 	resp := h.usecase.Dynamic(ctx, domain.DefaultPayload{
+		Context:      c,
 		Request:      c.Request,
-		Query:        c.Request.URL.Query(),
-		Params:       c.Params,
 		Payload:      payload,
 		AuthData:     authData,
 		RouteService: route,

@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"mime/multipart"
 	"net/http"
 )
 
@@ -52,7 +53,8 @@ type RouteService struct {
 }
 
 type RequestPayload struct {
-	Headers http.Header
-	Query   map[string]string
-	Data    interface{}
+	Headers   http.Header
+	Query     map[string]string
+	Data      interface{}
+	Multipart *multipart.Form
 }

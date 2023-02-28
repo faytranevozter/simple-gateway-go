@@ -19,9 +19,12 @@ func (u *gatewayUsecase) Dynamic(ctx context.Context, options domain.DefaultPayl
 	_, cancel := context.WithTimeout(ctx, u.contextTimeout)
 	defer cancel()
 
+	params := options.Context.Params
+	query := options.Request.URL.Query()
+
 	// queryparam
 	newQuery := make(map[string]string)
-	for k, v := range options.Query {
+	for k, v := range query {
 		newQuery[k] = v[0]
 	}
 
@@ -39,7 +42,7 @@ func (u *gatewayUsecase) Dynamic(ctx context.Context, options domain.DefaultPayl
 	availableDataStr := make(map[string]string)
 
 	// assign param data
-	for _, param := range options.Params {
+	for _, param := range params {
 		availableData["param."+param.Key] = param.Value
 		availableDataStr["param."+param.Key] = param.Value
 	}
@@ -55,10 +58,13 @@ func (u *gatewayUsecase) Dynamic(ctx context.Context, options domain.DefaultPayl
 		url = helpers.StringReplacer(url, availableDataStr)
 	}
 
+	files, _ := options.Context.MultipartForm()
+
 	body, statusCode, err := helpers.SimpleRequest(method, url, domain.RequestPayload{
-		Data:    options.Payload,
-		Query:   newQuery,
-		Headers: newHeaders,
+		Data:      options.Payload,
+		Query:     newQuery,
+		Headers:   newHeaders,
+		Multipart: files,
 	})
 	if err != nil {
 		return response.Error(http.StatusInternalServerError, err.Error())
